@@ -1,0 +1,8 @@
+gate,status,notes
+exposure_value_non_negative,PASS,negative rows: 0
+exposure_value_non_null,PASS,non-null: 134/134
+route_fields_present,PASS,"present=['destination_city', 'origin_city']"
+distance_km_non_null,PASS,non-null: 124/134
+distance_km_near_zero_check,PASS,near-zero (<5km) rows: 0 (intracity or same-city legs)
+duplicate_key_check,PASS,strict 12-digit eWayBill duplicated count: 0 | missing/blank: 134
+geo_columns_present,PASS,"present=['origin_lat', 'origin_lon', 'dest_lat', 'dest_lon']"
