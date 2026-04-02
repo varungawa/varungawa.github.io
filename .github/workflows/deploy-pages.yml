@@ -1,0 +1,54 @@
+name: Deploy GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build static bundle
+        env:
+          MAPBOX_PUBLIC_TOKEN: ${{ vars.MAPBOX_PUBLIC_TOKEN }}
+        run: |
+          mkdir -p dist
+          cp index.html dist/index.html
+          cp .nojekyll dist/.nojekyll
+          cp odc_cargo_movement_report.pdf dist/odc_cargo_movement_report.pdf
+          cp -R local_artifacts dist/local_artifacts
+          python - <<'PY'
+from pathlib import Path
+import os
+
+path = Path("dist/index.html")
+token = os.environ.get("MAPBOX_PUBLIC_TOKEN", "").strip()
+placeholder = "__MAPBOX_PUBLIC_TOKEN__"
+text = path.read_text(encoding="utf-8")
+path.write_text(text.replace(placeholder, token), encoding="utf-8")
+PY
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
